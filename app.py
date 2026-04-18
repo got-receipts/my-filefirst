@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "commerce.db")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 UPLOADS_DIR = os.path.join(STATIC_DIR, "uploads", "verification")
+PRODUCT_UPLOADS_DIR = os.path.join(STATIC_DIR, "uploads", "products")
 SESSION_COOKIE = "budhub_session"
 APP_NAME = "Budhub"
 APP_TAGLINE = "Licensed cannabis delivery with live menus, simple checkout, and clear order tracking."
@@ -95,6 +96,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
         "price": 25.50,
         "stock": 10,
+        "image_url": "https://images.leafly.com/flower-images/defaults/purple/strain-5.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/la-confidential",
     },
     {
         "name": "Candy Fumes DS 7G",
@@ -109,6 +112,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
         "price": 25.50,
         "stock": 10,
+        "image_url": "https://leafly-public.imgix.net/strains/photos/5SPDG4T4TcSO8PgLgWHO_SourDiesel_AdobeStock_171888473.jpg?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/sour-diesel",
     },
     {
         "name": "Strawberry Gumbo DS 7G",
@@ -158,6 +163,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $30.50. Low stock batch.",
         "price": 30.50,
         "stock": 4,
+        "image_url": "https://images.leafly.com/flower-images/defaults/long-fluffy-wispy/strain-7.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/afghan-kush",
     },
     {
         "name": "Sundae Driver DS 7G",
@@ -165,6 +172,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $30.50.",
         "price": 30.50,
         "stock": 8,
+        "image_url": "https://images.leafly.com/flower-images/defaults/purple/strain-17.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/sundae-driver",
     },
     {
         "name": "Cinnamon Roll Runtz DS 7G",
@@ -179,6 +188,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $30.50.",
         "price": 30.50,
         "stock": 8,
+        "image_url": "https://leafly-public.imgix.net/strains/photos/IaYQshrPTxiD2BOWHO1n_AnimalMints.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/animal-mints",
     },
     {
         "name": "Maui Gushers DS 7G",
@@ -207,6 +218,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
         "price": 35.50,
         "stock": 8,
+        "image_url": "https://images.leafly.com/flower-images/pineapple-express.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/pineapple-express",
     },
     {
         "name": "Obama Runtz DS 7G",
@@ -221,6 +234,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
         "price": 35.50,
         "stock": 8,
+        "image_url": "https://images.leafly.com/flower-images/defaults/purple/strain-10.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/purple-haze",
     },
     {
         "name": "Newyork Gumbo DS 7G",
@@ -277,6 +292,8 @@ LAUNCH_MENU = [
         "description": "Double Stuffed 7G flower. Tier priced at $50.50.",
         "price": 50.50,
         "stock": 5,
+        "image_url": "https://images.leafly.com/flower-images/defaults/generic/strain-22.png?auto=compress&w=1200&h=630&fit=crop&bg=FFFFFF&fit=fill",
+        "source_url": "https://www.leafly.com/strains/super-sour-diesel",
     },
     {
         "name": "Lung Smacker DS 7G",
@@ -333,6 +350,19 @@ def is_double_stuffed_product(product):
     name = str(product["name"]).upper()
     description = str(product["description"]).upper()
     return "DS 7G" in name or "DOUBLE STUFFED" in description
+
+
+def slugify_name(value):
+    cleaned = []
+    for char in value.lower():
+        if char.isalnum():
+            cleaned.append(char)
+        elif char in {" ", "-", "#"}:
+            cleaned.append("-")
+    slug = "".join(cleaned)
+    while "--" in slug:
+        slug = slug.replace("--", "-")
+    return slug.strip("-")
 
 
 def parse_cookies(environ):
@@ -447,18 +477,35 @@ def sync_launch_menu(connection):
             connection.execute(
                 """
                 UPDATE products
-                SET category = ?, description = ?, price = ?, stock = ?
+                SET category = ?, description = ?, image_url = ?, source_url = ?, price = ?, stock = ?
                 WHERE id = ?
                 """,
-                (item["category"], item["description"], item["price"], item["stock"], existing["id"]),
+                (
+                    item["category"],
+                    item["description"],
+                    item.get("image_url"),
+                    item.get("source_url"),
+                    item["price"],
+                    item["stock"],
+                    existing["id"],
+                ),
             )
         else:
             connection.execute(
                 """
-                INSERT INTO products (name, category, description, price, stock, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO products (name, category, description, image_url, source_url, price, stock, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (item["name"], item["category"], item["description"], item["price"], item["stock"], now_iso()),
+                (
+                    item["name"],
+                    item["category"],
+                    item["description"],
+                    item.get("image_url"),
+                    item.get("source_url"),
+                    item["price"],
+                    item["stock"],
+                    now_iso(),
+                ),
             )
 
     existing_products = connection.execute("SELECT id, name FROM products").fetchall()
@@ -550,6 +597,8 @@ def init_db():
                 name TEXT NOT NULL,
                 category TEXT NOT NULL DEFAULT 'General',
                 description TEXT NOT NULL,
+                image_url TEXT,
+                source_url TEXT,
                 price REAL NOT NULL,
                 stock INTEGER NOT NULL,
                 created_at TEXT NOT NULL
@@ -655,6 +704,8 @@ def init_db():
         ensure_column(connection, "support_tickets", "priority TEXT NOT NULL DEFAULT 'NORMAL'")
         ensure_column(connection, "support_tickets", "related_ticket_id INTEGER")
         ensure_column(connection, "products", "category TEXT NOT NULL DEFAULT 'General'")
+        ensure_column(connection, "products", "image_url TEXT")
+        ensure_column(connection, "products", "source_url TEXT")
         ensure_column(connection, "tickets", "fulfillment_type TEXT NOT NULL DEFAULT 'DELIVERY'")
         ensure_column(connection, "tickets", "coupon_code TEXT")
         ensure_column(connection, "tickets", "discount_amount REAL NOT NULL DEFAULT 0")
@@ -1205,12 +1256,14 @@ def render_store_page(connection, user=None, message=None, level="info"):
         grouped_cards.setdefault(product["category"], []).append(
             f"""
             <article class="product-card">
+              {f'<img class="product-card-image" src="{html.escape(product["image_url"])}" alt="{html.escape(product["name"])}">' if product["image_url"] else ""}
               <div class="product-card-top">
                 <span class="eyebrow">{html.escape(card_label)} | In Stock: {product["stock"]}</span>
                 <h3>{html.escape(product["name"])}</h3>
                 <span class="price-pill">{format_money(product["price"])}</span>
               </div>
               <p>{html.escape(product["description"])}</p>
+              {f'<a class="source-link" href="{html.escape(product["source_url"])}" target="_blank" rel="noopener noreferrer">Leafly Reference</a>' if product["source_url"] else ""}
               <div class="product-card-bottom">{action}</div>
             </article>
             """
