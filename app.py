@@ -19,6 +19,274 @@ APP_NAME = "Budhub"
 APP_TAGLINE = "Licensed cannabis delivery with live menus, simple checkout, and clear order tracking."
 CLEANUP_DONE = False
 
+MENU_SECTIONS = ["Flower", "Edibles", "Concentrates", "General"]
+MENU_SECTION_NOTES = {
+    "Edibles": "Flavor options are listed in the product details when available.",
+    "Concentrates": "Concentrate options are listed by jar size.",
+    "Flower": "Flower includes the Double Stuffed 7G lineup and any other whole flower options.",
+}
+LAUNCH_MENU = [
+    {
+        "name": "THC Syrup 1000MG",
+        "category": "Edibles",
+        "description": "1000MG syrup. Flavors: Cherry, Grape, Strawberry Kiwi.",
+        "price": 25.50,
+        "stock": 15,
+    },
+    {
+        "name": "1G Diamonds",
+        "category": "Concentrates",
+        "description": "1 gram concentrate jar.",
+        "price": 25.50,
+        "stock": 12,
+    },
+    {
+        "name": "3G Diamonds",
+        "category": "Concentrates",
+        "description": "3 gram concentrate jar.",
+        "price": 70.50,
+        "stock": 10,
+    },
+    {
+        "name": "LJA OZ",
+        "category": "Flower",
+        "description": "Full ounce flower option.",
+        "price": 100.50,
+        "stock": 8,
+    },
+    {
+        "name": "Mendo Berries DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $15.50.",
+        "price": 15.50,
+        "stock": 14,
+    },
+    {
+        "name": "Electric Lemon DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $15.50.",
+        "price": 15.50,
+        "stock": 10,
+    },
+    {
+        "name": "Cherry Crushers DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $15.50.",
+        "price": 15.50,
+        "stock": 10,
+    },
+    {
+        "name": "Pink Mimosas Smalls DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $17.50.",
+        "price": 17.50,
+        "stock": 10,
+    },
+    {
+        "name": "Cotton Candy Smalls DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $17.50.",
+        "price": 17.50,
+        "stock": 10,
+    },
+    {
+        "name": "LA Confidential DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Candy Fumes DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Sour Candy DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Strawberry Gumbo DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Blue Nerds DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Sweet Exotic Candy DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Lemon Cherry Gelato DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Lollipops DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Frozen Runtz DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $25.50.",
+        "price": 25.50,
+        "stock": 10,
+    },
+    {
+        "name": "Afghan Kush DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $30.50. Low stock batch.",
+        "price": 30.50,
+        "stock": 4,
+    },
+    {
+        "name": "Sundae Driver DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $30.50.",
+        "price": 30.50,
+        "stock": 8,
+    },
+    {
+        "name": "Cinnamon Roll Runtz DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $30.50.",
+        "price": 30.50,
+        "stock": 8,
+    },
+    {
+        "name": "Animal Mints DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $30.50.",
+        "price": 30.50,
+        "stock": 8,
+    },
+    {
+        "name": "Maui Gushers DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $30.50.",
+        "price": 30.50,
+        "stock": 8,
+    },
+    {
+        "name": "Garlic Breath DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Frozen Pink Runtz DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Pineapple Express DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Obama Runtz DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Purple Haze DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Newyork Gumbo DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50. Low stock batch.",
+        "price": 35.50,
+        "stock": 4,
+    },
+    {
+        "name": "Pineapple Snot DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Gorilla Glue #4 DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $35.50.",
+        "price": 35.50,
+        "stock": 8,
+    },
+    {
+        "name": "Rage Bait DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $40.50.",
+        "price": 40.50,
+        "stock": 6,
+    },
+    {
+        "name": "Sour Apple Gelato DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $40.50.",
+        "price": 40.50,
+        "stock": 6,
+    },
+    {
+        "name": "Gladiator Kush DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $40.50.",
+        "price": 40.50,
+        "stock": 6,
+    },
+    {
+        "name": "Sour Milk DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $40.50.",
+        "price": 40.50,
+        "stock": 6,
+    },
+    {
+        "name": "Super Sour Diesel DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $50.50.",
+        "price": 50.50,
+        "stock": 5,
+    },
+    {
+        "name": "Lung Smacker DS 7G",
+        "category": "Flower",
+        "description": "Double Stuffed 7G flower. Tier priced at $50.50.",
+        "price": 50.50,
+        "stock": 5,
+    },
+]
+
 ROLE_LABELS = {
     "admin": "Admin",
     "banker": "In-House Bank",
@@ -59,6 +327,12 @@ def hash_password(password):
 
 def format_money(value):
     return f"${value:,.2f}"
+
+
+def is_double_stuffed_product(product):
+    name = str(product["name"]).upper()
+    description = str(product["description"]).upper()
+    return "DS 7G" in name or "DOUBLE STUFFED" in description
 
 
 def parse_cookies(environ):
@@ -165,6 +439,46 @@ def ensure_column(connection, table_name, definition):
         connection.execute(f"ALTER TABLE {table_name} ADD COLUMN {definition}")
 
 
+def sync_launch_menu(connection):
+    launch_names = {item["name"] for item in LAUNCH_MENU}
+    for item in LAUNCH_MENU:
+        existing = connection.execute("SELECT id FROM products WHERE name = ?", (item["name"],)).fetchone()
+        if existing:
+            connection.execute(
+                """
+                UPDATE products
+                SET category = ?, description = ?, price = ?, stock = ?
+                WHERE id = ?
+                """,
+                (item["category"], item["description"], item["price"], item["stock"], existing["id"]),
+            )
+        else:
+            connection.execute(
+                """
+                INSERT INTO products (name, category, description, price, stock, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (item["name"], item["category"], item["description"], item["price"], item["stock"], now_iso()),
+            )
+
+    existing_products = connection.execute("SELECT id, name FROM products").fetchall()
+    for product in existing_products:
+        if product["name"] in launch_names:
+            continue
+        referenced = connection.execute(
+            "SELECT 1 FROM ticket_items WHERE product_id = ? LIMIT 1",
+            (product["id"],),
+        ).fetchone()
+        if referenced:
+            connection.execute(
+                "UPDATE products SET stock = 0, category = 'General' WHERE id = ?",
+                (product["id"],),
+            )
+        else:
+            connection.execute("DELETE FROM cart_items WHERE product_id = ?", (product["id"],))
+            connection.execute("DELETE FROM products WHERE id = ?", (product["id"],))
+
+
 def get_current_user(environ, connection):
     jar = parse_cookies(environ)
     session_cookie = jar.get(SESSION_COOKIE)
@@ -234,6 +548,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT 'General',
                 description TEXT NOT NULL,
                 price REAL NOT NULL,
                 stock INTEGER NOT NULL,
@@ -339,6 +654,7 @@ def init_db():
         ensure_column(connection, "users", "verified_at TEXT")
         ensure_column(connection, "support_tickets", "priority TEXT NOT NULL DEFAULT 'NORMAL'")
         ensure_column(connection, "support_tickets", "related_ticket_id INTEGER")
+        ensure_column(connection, "products", "category TEXT NOT NULL DEFAULT 'General'")
         ensure_column(connection, "tickets", "fulfillment_type TEXT NOT NULL DEFAULT 'DELIVERY'")
         ensure_column(connection, "tickets", "coupon_code TEXT")
         ensure_column(connection, "tickets", "discount_amount REAL NOT NULL DEFAULT 0")
@@ -377,28 +693,7 @@ def seed_defaults(connection):
             (name, email, hash_password(password), role, now_iso(), now_iso()),
         )
 
-    products = [
-        ("Blue Dream Flower", "Balanced daytime flower with a smooth, approachable profile.", 35.00, 40),
-        ("OG Kush Pre-Rolls", "Two-pack of ready-to-go pre-rolls for quick pickup and delivery.", 22.00, 26),
-        ("Mango Gummies", "10-count edible pack with a fruit-forward flavor and clear dosing.", 18.00, 35),
-    ]
-    rename_map = {
-        "Wireless Headphones": products[0],
-        "Smart Watch": products[1],
-        "Portable Speaker": products[2],
-    }
-    for old_name, replacement in rename_map.items():
-        connection.execute(
-            "UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE name = ?",
-            (replacement[0], replacement[1], replacement[2], replacement[3], old_name),
-        )
-    for name, description, price, stock in products:
-        if connection.execute("SELECT id FROM products WHERE name = ?", (name,)).fetchone():
-            continue
-        connection.execute(
-            "INSERT INTO products (name, description, price, stock, created_at) VALUES (?, ?, ?, ?, ?)",
-            (name, description, price, stock, now_iso()),
-        )
+    sync_launch_menu(connection)
 
 
 def cleanup_generated_tickets(connection):
@@ -866,9 +1161,29 @@ def reserve_ticket_stock(connection, ticket_id):
 
 
 def render_store_page(connection, user=None, message=None, level="info"):
-    products = connection.execute("SELECT * FROM products ORDER BY id DESC").fetchall()
+    products = connection.execute(
+        """
+        SELECT *
+        FROM products
+        WHERE stock > 0
+        ORDER BY
+            CASE category
+                WHEN 'Flower' THEN 1
+                WHEN 'Edibles' THEN 2
+                WHEN 'Concentrates' THEN 3
+                ELSE 5
+            END,
+            CASE
+                WHEN category = 'Flower' AND (name LIKE '%DS 7G%' OR description LIKE '%Double Stuffed%') THEN 0
+                WHEN category = 'Flower' THEN 1
+                ELSE 0
+            END,
+            price ASC,
+            name COLLATE NOCASE ASC
+        """
+    ).fetchall()
     cart_count = client_cart_count(connection, user["id"]) if user and user["role"] == "client" else 0
-    cards = []
+    grouped_cards = {section: [] for section in MENU_SECTIONS}
     for product in products:
         action = "<a class='button' href='/login'>Login to Order</a>"
         if user and user["role"] == "client":
@@ -884,11 +1199,14 @@ def render_store_page(connection, user=None, message=None, level="info"):
             """
         elif user:
             action = "<a class='button ghost' href='/dashboard'>Open Dashboard</a>"
-        cards.append(
+        card_label = product["category"]
+        if product["category"] == "Flower" and is_double_stuffed_product(product):
+            card_label = "Flower | Double Stuffed 7G"
+        grouped_cards.setdefault(product["category"], []).append(
             f"""
             <article class="product-card">
               <div class="product-card-top">
-                <span class="eyebrow">Available Today: {product["stock"]}</span>
+                <span class="eyebrow">{html.escape(card_label)} | In Stock: {product["stock"]}</span>
                 <h3>{html.escape(product["name"])}</h3>
                 <span class="price-pill">{format_money(product["price"])}</span>
               </div>
@@ -897,12 +1215,32 @@ def render_store_page(connection, user=None, message=None, level="info"):
             </article>
             """
         )
+    menu_sections = []
+    for section in MENU_SECTIONS:
+        cards = grouped_cards.get(section, [])
+        if not cards:
+            continue
+        menu_sections.append(
+            f"""
+            <section class="menu-section">
+              <div class="menu-section-head">
+                <div>
+                  <span class="eyebrow">Budhub Menu</span>
+                  <h3>{html.escape(section)}</h3>
+                </div>
+                <span class="menu-count">{len(cards)} items</span>
+              </div>
+              <p class="menu-note">{html.escape(MENU_SECTION_NOTES.get(section, "Live inventory available now."))}</p>
+              <div class="product-grid">{''.join(cards)}</div>
+            </section>
+            """
+        )
     body = f"""
     <section class="hero">
       <div>
         <span class="eyebrow">Licensed Cannabis Delivery</span>
-        <h2>Shop live menus, choose delivery or pickup, and follow your order with a clear start-to-finish flow.</h2>
-        <p>Budhub is presented as a cannabis ordering experience with menu browsing, address confirmation, checkout, dispatch updates, and delivery tracking designed to feel straightforward for the customer.</p>
+        <h2>Shop the Budhub live menu with flower, concentrates, edibles, delivery, and pickup.</h2>
+        <p>Double Stuffed items are now shown as flower, with the 7 gram pack style called out on each item so the menu reads the right way for customers.</p>
         {f"<div class='tracker-note'>Available credits: {format_money(user['credit_balance'])}</div>" if user and user['role'] == 'client' else ""}
         <div class="hero-actions">
           <a class="button" href="{'/cart' if user and user['role'] == 'client' else '/login'}">{'Open Bag' if user and user['role'] == 'client' else 'Customer Login'}</a>
@@ -921,10 +1259,11 @@ def render_store_page(connection, user=None, message=None, level="info"):
           <span class="eyebrow">Storefront</span>
           <strong>{len(products)} items available</strong>
           <span>{cart_count} items ready in bag</span>
+          <span>{sum(1 for product in products if product["category"] == "Flower" and is_double_stuffed_product(product))} Double Stuffed flower options</span>
         </div>
       </div>
     </section>
-    <section class="product-grid">{''.join(cards)}</section>
+    {''.join(menu_sections)}
     """
     return page(APP_NAME, body, user=user, message=message, level=level, cart_count=cart_count)
 
@@ -1468,6 +1807,14 @@ def render_admin_dashboard(connection, user, message=None, level="info"):
         <h2>Add Menu Item</h2>
         <form method="post" action="/products/create" class="form-grid">
           <label>Name<input type="text" name="name" required></label>
+          <label>Category
+            <select name="category">
+              <option value="Edibles">Edibles</option>
+              <option value="Concentrates">Concentrates</option>
+              <option value="Flower">Flower</option>
+              <option value="General">General</option>
+            </select>
+          </label>
           <label>Price<input type="number" name="price" min="0.01" step="0.01" required></label>
           <label>Stock<input type="number" name="stock" min="0" required></label>
           <label>Description<textarea name="description" required></textarea></label>
@@ -1689,9 +2036,17 @@ def handle_create_product(environ, start_response, connection, user):
     if gate:
         return gate
     data = read_post_data(environ)
+    category = data.get("category", "General") or "General"
     connection.execute(
-        "INSERT INTO products (name, description, price, stock, created_at) VALUES (?, ?, ?, ?, ?)",
-        (data.get("name", ""), data.get("description", ""), float(data.get("price", "0")), int(data.get("stock", "0")), now_iso()),
+        "INSERT INTO products (name, category, description, price, stock, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            data.get("name", ""),
+            category,
+            data.get("description", ""),
+            float(data.get("price", "0")),
+            int(data.get("stock", "0")),
+            now_iso(),
+        ),
     )
     connection.commit()
     return redirect(start_response, "/admin?message=Menu item created")
