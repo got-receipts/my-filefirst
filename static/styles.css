@@ -131,6 +131,41 @@ nav {
   gap: 0.85rem;
 }
 
+.emergency-panel {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(161, 45, 45, 0.15);
+  background: rgba(161, 45, 45, 0.05);
+}
+
+.emergency-buttons {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.emergency-guide {
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  font-weight: 600;
+}
+
+.emergency-medical,
+.emergency-medical-button {
+  background: rgba(240, 196, 71, 0.22);
+  color: #7a5b19;
+}
+
+.emergency-accident,
+.emergency-robbery {
+  background: rgba(161, 45, 45, 0.14);
+  color: #8f1f1f;
+}
+
+.emergency-traffic {
+  background: rgba(34, 87, 122, 0.12);
+  color: var(--info);
+}
+
 .hero-flow div {
   padding: 1rem;
   border-radius: 18px;

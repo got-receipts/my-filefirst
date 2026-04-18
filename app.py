@@ -295,13 +295,16 @@ def init_db():
                 user_id INTEGER NOT NULL,
                 opened_by INTEGER NOT NULL,
                 category TEXT NOT NULL,
+                priority TEXT NOT NULL DEFAULT 'NORMAL',
+                related_ticket_id INTEGER,
                 reason TEXT NOT NULL,
                 status TEXT NOT NULL,
                 resolution_note TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id),
-                FOREIGN KEY (opened_by) REFERENCES users(id)
+                FOREIGN KEY (opened_by) REFERENCES users(id),
+                FOREIGN KEY (related_ticket_id) REFERENCES tickets(id)
             );
 
             CREATE TABLE IF NOT EXISTS coupons (
@@ -334,6 +337,8 @@ def init_db():
         ensure_column(connection, "users", "id_back_path TEXT")
         ensure_column(connection, "users", "id_selfie_path TEXT")
         ensure_column(connection, "users", "verified_at TEXT")
+        ensure_column(connection, "support_tickets", "priority TEXT NOT NULL DEFAULT 'NORMAL'")
+        ensure_column(connection, "support_tickets", "related_ticket_id INTEGER")
         ensure_column(connection, "tickets", "fulfillment_type TEXT NOT NULL DEFAULT 'DELIVERY'")
         ensure_column(connection, "tickets", "coupon_code TEXT")
         ensure_column(connection, "tickets", "discount_amount REAL NOT NULL DEFAULT 0")
@@ -574,10 +579,12 @@ def support_rows(connection, where_clause="", params=()):
         SELECT support_tickets.*,
                users.name AS user_name,
                users.email AS user_email,
-               openers.name AS opened_by_name
+               openers.name AS opened_by_name,
+               tickets.ticket_number AS related_ticket_number
         FROM support_tickets
         JOIN users ON users.id = support_tickets.user_id
         JOIN users AS openers ON openers.id = support_tickets.opened_by
+        LEFT JOIN tickets ON tickets.id = support_tickets.related_ticket_id
         {where_clause}
         ORDER BY support_tickets.updated_at DESC, support_tickets.id DESC
         """,
@@ -621,6 +628,41 @@ def payment_summary(subtotal, discount_amount, credit_applied):
         "credit_applied": round(credit_applied, 2),
         "payment_due": due,
     }
+
+
+EMERGENCY_CONFIG = {
+    "medical_emergency": {
+        "label": "Medical Emergency",
+        "priority": "HIGH",
+        "ui_class": "emergency-medical",
+        "driver_message": "Dispatch is notified. Proceed with your emergency and await for a message to your phone.",
+    },
+    "car_accident": {
+        "label": "Car Accident",
+        "priority": "CRITICAL",
+        "ui_class": "emergency-accident",
+        "driver_message": "Dial 911 now and begin the process of an accident report. Dispatch and admin have been alerted as a red priority emergency.",
+    },
+    "robbery": {
+        "label": "Robbery",
+        "priority": "CRITICAL",
+        "ui_class": "emergency-robbery",
+        "driver_message": "Just comply. Your life is not worth small amounts of anything. Return to base immediately when you are safe.",
+    },
+    "traffic_stop": {
+        "label": "Traffic Stop",
+        "priority": "MEDIUM",
+        "ui_class": "emergency-traffic",
+        "driver_message": "Do not panic. You are never traveling with an illegal amount of anything, so comply and you will be okay.",
+    },
+}
+
+
+def emergency_meta(emergency_type):
+    return EMERGENCY_CONFIG.get(
+        emergency_type,
+        {"label": "Emergency", "priority": "HIGH", "ui_class": "emergency-default", "driver_message": "Dispatch has been notified."},
+    )
 
 
 def save_verification_upload(user_id, label, file_info):
@@ -955,6 +997,19 @@ def render_client_dashboard(connection, user, message=None, level="info"):
               {render_item_list(items_map.get(ticket["id"], []))}
               {render_tracker(ticket["status"])}
               {notes}
+              <div class="ticket-actions">
+                {
+                    f'''
+                    <form method="post" action="/orders/update" class="action-stack">
+                      <input type="hidden" name="order_id" value="{ticket["id"]}">
+                      <input type="hidden" name="action" value="client_cancel">
+                      <label>Cancel Reason<textarea name="reason" required placeholder="Tell us why you need to cancel"></textarea></label>
+                      <button type="submit" class="danger">Cancel Order</button>
+                    </form>
+                    '''
+                    if ticket["status"] not in {"DELIVERED", "CANCELED", "OUT_FOR_DELIVERY"} else "<span class='subtle'>This order can no longer be canceled online.</span>"
+                }
+              </div>
             </article>
             """
         )
@@ -1092,6 +1147,7 @@ def render_banker_dashboard(connection, user, message=None, level="info"):
 
 def render_dispatcher_dashboard(connection, user, message=None, level="info"):
     tickets = ticket_rows(connection, "", ())
+    emergency_alerts = support_rows(connection, "WHERE support_tickets.category LIKE 'EMERGENCY_%' AND support_tickets.status != 'CLOSED'", ())
     items_map = ticket_items_map(connection, [ticket["id"] for ticket in tickets])
     drivers = connection.execute("SELECT id, name FROM users WHERE role = 'driver' ORDER BY name").fetchall()
     driver_options = "".join(f"<option value='{driver['id']}'>{html.escape(driver['name'])}</option>" for driver in drivers)
@@ -1188,6 +1244,32 @@ def render_dispatcher_dashboard(connection, user, message=None, level="info"):
       <div class="stat-card"><span>Ready for Driver</span><strong>{sum(1 for ticket in tickets if ticket['status'] == 'READY_FOR_DISPATCH')}</strong></div>
       <div class="stat-card"><span>Needs Review</span><strong>{sum(1 for ticket in tickets if ticket['status'] == 'REVIEW_REQUIRED')}</strong></div>
       <div class="stat-card"><span>Active Tickets</span><strong>{sum(1 for ticket in tickets if ticket['status'] != 'CANCELED')}</strong></div>
+      <div class="stat-card"><span>Emergency Alerts</span><strong>{len(emergency_alerts)}</strong></div>
+    </section>
+    <section class="panel">
+      <h2>Emergency Alerts</h2>
+      <div class="order-card-grid">
+        {''.join(
+            f"""
+            <article class="order-card {html.escape(emergency_meta(alert['category'].replace('EMERGENCY_', '').lower()).get('ui_class', ''))}">
+              <div class="order-card-head">
+                <div>
+                  <span class="eyebrow">{html.escape(alert['priority'])} Priority</span>
+                  <h3>{html.escape(alert['user_name'])}</h3>
+                </div>
+                <span class="badge badge-review_required">{html.escape(emergency_meta(alert['category'].replace('EMERGENCY_', '').lower()).get('label', alert['category']))}</span>
+              </div>
+              <div class="order-meta">
+                <span>Ticket: {html.escape(alert['related_ticket_number'] or 'No ticket')}</span>
+                <span>Opened By: {html.escape(alert['opened_by_name'])}</span>
+                <span>Status: {html.escape(alert['status'])}</span>
+              </div>
+              <div class="reason-box">{html.escape(alert['reason'])}</div>
+            </article>
+            """
+            for alert in emergency_alerts
+        ) or '<p>No active emergency alerts.</p>'}
+      </div>
     </section>
     <section class="panel"><h2>Dispatch Board</h2><div class="order-card-grid">{''.join(cards) if cards else '<p>No dispatch work waiting.</p>'}</div></section>
     {render_credit_issue_panel(connection)}
@@ -1267,14 +1349,55 @@ def render_driver_dashboard(connection, user, message=None, level="info"):
                   <span>Dispatch: {html.escape(ticket["dispatcher_name"] or 'Dispatch board')}</span>
                   <span>Due: {format_money(max(0, ticket["total_amount"] - ticket["discount_amount"] - ticket["credit_applied"]))}</span>
                 </div>
-              {render_item_list(items_map.get(ticket["id"], []))}
-              <div class="ticket-actions">
-                <form method="post" action="/orders/update" class="action-stack">
-                  <input type="hidden" name="order_id" value="{ticket["id"]}">
-                  <input type="hidden" name="action" value="{action}">
-                  <button type="submit">{button}</button>
-                </form>
-              </div>
+                {render_item_list(items_map.get(ticket["id"], []))}
+                <div class="ticket-actions">
+                  <form method="post" action="/orders/update" class="action-stack">
+                    <input type="hidden" name="order_id" value="{ticket["id"]}">
+                    <input type="hidden" name="action" value="{action}">
+                    <button type="submit">{button}</button>
+                  </form>
+                  <div class="emergency-panel">
+                    <strong>Driver Safety Resources</strong>
+                    <div class="card-buttons emergency-buttons">
+                      <form method="post" action="/orders/update" class="inline-form">
+                        <input type="hidden" name="order_id" value="{ticket["id"]}">
+                        <input type="hidden" name="action" value="driver_emergency">
+                        <input type="hidden" name="emergency_type" value="medical_emergency">
+                        <button type="submit" class="emergency-medical-button">Medical Emergency</button>
+                      </form>
+                      <form method="post" action="/orders/update" class="inline-form">
+                        <input type="hidden" name="order_id" value="{ticket["id"]}">
+                        <input type="hidden" name="action" value="driver_emergency">
+                        <input type="hidden" name="emergency_type" value="car_accident">
+                        <button type="submit" class="danger">Car Accident</button>
+                      </form>
+                      <form method="post" action="/orders/update" class="inline-form">
+                        <input type="hidden" name="order_id" value="{ticket["id"]}">
+                        <input type="hidden" name="action" value="driver_emergency">
+                        <input type="hidden" name="emergency_type" value="robbery">
+                        <button type="submit" class="danger">Robbery</button>
+                      </form>
+                      <form method="post" action="/orders/update" class="inline-form">
+                        <input type="hidden" name="order_id" value="{ticket["id"]}">
+                        <input type="hidden" name="action" value="driver_emergency">
+                        <input type="hidden" name="emergency_type" value="traffic_stop">
+                        <button type="submit" class="button ghost">Traffic Stop</button>
+                      </form>
+                    </div>
+                    <div class="emergency-guide emergency-medical">
+                      <strong>Medical emergency:</strong> Dispatch is notified. Proceed with your emergency and await for a message to your phone.
+                    </div>
+                    <div class="emergency-guide emergency-accident">
+                      <strong>Car accident:</strong> Dial 911 now and begin the process of an accident report.
+                    </div>
+                    <div class="emergency-guide emergency-robbery">
+                      <strong>Robbery:</strong> Just comply. Your life is not worth small amounts of anything. Return to base immediately when you are safe.
+                    </div>
+                    <div class="emergency-guide emergency-traffic">
+                      <strong>Traffic stop:</strong> Do not panic. You are never traveling with an illegal amount of anything on you, so comply and you will be okay.
+                    </div>
+                  </div>
+                </div>
             </article>
             """
         )
@@ -1328,6 +1451,7 @@ def render_admin_dashboard(connection, user, message=None, level="info"):
       <div class="stat-card"><span>Budhub Tickets</span><strong>{len(tickets)}</strong></div>
       <div class="stat-card"><span>Support Inbox</span><strong>{sum(1 for ticket in support if ticket['status'] != 'CLOSED')}</strong></div>
       <div class="stat-card"><span>ID Reviews</span><strong>{len(verification_queue)}</strong></div>
+      <div class="stat-card"><span>Emergency Alerts</span><strong>{sum(1 for ticket in support if str(ticket['category']).startswith('EMERGENCY_') and ticket['status'] != 'CLOSED')}</strong></div>
     </section>
     <section class="admin-grid">
       <section class="panel">
@@ -1446,8 +1570,10 @@ def render_admin_dashboard(connection, user, message=None, level="info"):
                 <div class="order-meta">
                   <span>User: {html.escape(ticket["user_email"])}</span>
                   <span>Opened By: {html.escape(ticket["opened_by_name"])}</span>
+                  <span>Priority: {html.escape(ticket["priority"])}</span>
+                  <span>Ticket: {html.escape(ticket["related_ticket_number"] or "N/A")}</span>
                 </div>
-                <div class="reason-box">{html.escape(ticket["reason"])}</div>
+                <div class="reason-box {'emergency-medical' if ticket['category']=='EMERGENCY_MEDICAL_EMERGENCY' else 'emergency-accident' if ticket['category']=='EMERGENCY_CAR_ACCIDENT' else 'emergency-robbery' if ticket['category']=='EMERGENCY_ROBBERY' else 'emergency-traffic' if ticket['category']=='EMERGENCY_TRAFFIC_STOP' else ''}">{html.escape(ticket["reason"])}</div>
                 <form method="post" action="/support/update" class="action-stack">
                   <input type="hidden" name="ticket_id" value="{ticket["id"]}">
                   <label>Review Status<select name="status"><option value="OPEN">Open</option><option value="REVIEWED">Reviewed</option><option value="CLOSED">Closed</option></select></label>
@@ -1731,7 +1857,7 @@ def handle_cart_checkout(environ, start_response, connection, user):
 
 
 def handle_update_order(environ, start_response, connection, user):
-    gate = require_role(start_response, user, {"banker", "dispatcher", "picker", "driver"})
+    gate = require_role(start_response, user, {"banker", "dispatcher", "picker", "driver", "client"})
     if gate:
         return gate
     data = read_post_data(environ)
@@ -1747,6 +1873,21 @@ def handle_update_order(environ, start_response, connection, user):
             connection.commit()
             return redirect(start_response, "/dashboard?message=Payment verified")
         return redirect(start_response, "/dashboard?message=That bank action is not allowed")
+
+    if user["role"] == "client":
+        if ticket["client_id"] != user["id"]:
+            return redirect(start_response, "/dashboard?message=That order is not yours")
+        if action == "client_cancel":
+            if ticket["status"] in {"DELIVERED", "CANCELED", "OUT_FOR_DELIVERY"}:
+                return redirect(start_response, "/dashboard?message=This order can no longer be canceled online")
+            reason = data.get("reason", "").strip()
+            if not reason:
+                return redirect(start_response, "/dashboard?message=Cancel reason is required")
+            release_ticket_stock(connection, ticket_id)
+            update_ticket(connection, ticket_id, status="CANCELED", cancel_reason=reason)
+            connection.commit()
+            return redirect(start_response, "/dashboard?message=Order canceled")
+        return redirect(start_response, "/dashboard?message=That customer action is not allowed")
 
     if user["role"] == "picker":
         if action == "pack_order" and ticket["status"] == "PACKING":
@@ -1816,6 +1957,28 @@ def handle_update_order(environ, start_response, connection, user):
     if user["role"] == "driver":
         if ticket["driver_id"] != user["id"]:
             return redirect(start_response, "/dashboard?message=That route is not assigned to you")
+        if action == "driver_emergency":
+            emergency_type = data.get("emergency_type", "")
+            meta = emergency_meta(emergency_type)
+            connection.execute(
+                """
+                INSERT INTO support_tickets (
+                    user_id, opened_by, category, priority, related_ticket_id, reason, status, resolution_note, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'OPEN', '', ?, ?)
+                """,
+                (
+                    user["id"],
+                    user["id"],
+                    f"EMERGENCY_{emergency_type.upper()}",
+                    meta["priority"],
+                    ticket_id,
+                    meta["driver_message"],
+                    now_iso(),
+                    now_iso(),
+                ),
+            )
+            connection.commit()
+            return redirect(start_response, f"/dashboard?message={meta['driver_message']}")
         if action == "start_route" and ticket["status"] == "DRIVER_ASSIGNED":
             update_ticket(connection, ticket_id, status="OUT_FOR_DELIVERY")
             connection.commit()
