@@ -16,7 +16,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 UPLOADS_DIR = os.path.join(STATIC_DIR, "uploads", "verification")
 SESSION_COOKIE = "budhub_session"
 APP_NAME = "Budhub"
-APP_TAGLINE = "Cannabis orders, packing, dispatch, delivery, and final payment verification in one place."
+APP_TAGLINE = "Licensed cannabis delivery with live menus, simple checkout, and clear order tracking."
 CLEANUP_DONE = False
 
 ROLE_LABELS = {
@@ -900,9 +900,9 @@ def render_store_page(connection, user=None, message=None, level="info"):
     body = f"""
     <section class="hero">
       <div>
-        <span class="eyebrow">Budhub Workflow</span>
-        <h2>One grouped ticket from the customer bag, then packing, dispatch, delivery, and final payment verification at handoff.</h2>
-        <p>Orders no longer split into separate tickets from the cart. Dispatch assigns drivers manually, pickers can send tickets back for changes, and payment can stay pending until the driver is ready to complete delivery.</p>
+        <span class="eyebrow">Licensed Cannabis Delivery</span>
+        <h2>Shop live menus, choose delivery or pickup, and follow your order with a clear start-to-finish flow.</h2>
+        <p>Budhub is presented as a cannabis ordering experience with menu browsing, address confirmation, checkout, dispatch updates, and delivery tracking designed to feel straightforward for the customer.</p>
         {f"<div class='tracker-note'>Available credits: {format_money(user['credit_balance'])}</div>" if user and user['role'] == 'client' else ""}
         <div class="hero-actions">
           <a class="button" href="{'/cart' if user and user['role'] == 'client' else '/login'}">{'Open Bag' if user and user['role'] == 'client' else 'Customer Login'}</a>
@@ -911,16 +911,16 @@ def render_store_page(connection, user=None, message=None, level="info"):
       </div>
       <div class="hero-side">
         <div class="hero-flow">
-          <div>Customer places one Budhub ticket</div>
-          <div>Picker packs or flags review</div>
-          <div>Dispatch assigns the driver</div>
-          <div>Driver reaches customer</div>
-          <div>Bank verification must be in before completion</div>
+          <div>Browse the menu and build your bag</div>
+          <div>Choose delivery or pickup details</div>
+          <div>Confirm the order and dispatch</div>
+          <div>Track progress while the order is on the way</div>
+          <div>Complete handoff with payment and ID check</div>
         </div>
         <div class="hero-summary">
-          <span class="eyebrow">Live Menu</span>
+          <span class="eyebrow">Storefront</span>
           <strong>{len(products)} items available</strong>
-          <span>{cart_count} items in bag</span>
+          <span>{cart_count} items ready in bag</span>
         </div>
       </div>
     </section>
